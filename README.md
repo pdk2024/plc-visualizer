@@ -39,25 +39,7 @@ Currently monitoring steam tunnel control parameters with plans to expand to pro
 
 ### Production Monitoring (Coming Soon)
 - [ ] Production PLC Integration (IP: 192.168.1.113)
-- [ ] Shift-based production metrics
-- [ ] Real-time alarm monitoring
-- [ ] Production reports generation
-
-### System Enhancements
-- [ ] Configuration file for PLC settings
-- [ ] Comprehensive logging system
-- [ ] Authentication system
-- [ ] API endpoints for configuration
-- [ ] Unit tests coverage
-- [ ] Error reporting system
-
-### Frontend Improvements
-- [ ] Data export functionality
-- [ ] Enhanced chart controls (zoom/pan)
-- [ ] Multiple chart types/views
-- [ ] Real-time statistics
-- [ ] Dark mode support
-- [ ] Mobile optimizations
+- [ ] Shift-based production
 
 ## Setup
 
@@ -65,10 +47,13 @@ Currently monitoring steam tunnel control parameters with plans to expand to pro
 
 curl -sSL https://install.python-poetry.org | python3 -
 
+2. Clone the repository:
 
 git clone https://github.com/pdk2024/plc-visualizer.git
 
 cd plc-visualizer
+
+3. Install dependencies:
 
 poetry install
 
@@ -76,7 +61,8 @@ poetry install
 
 poetry run python src/plc_visualizer/app.py
 
-#Project Structure  
+##Project Structure  
+
 plc-visualizer/
 ├── src/
 │ └── plc_visualizer/
@@ -116,16 +102,4 @@ plc-visualizer/
 ## Contact
 Project maintained by PDK
 
-Changes made:
-Combined the features sections
-Added the current SQLite database implementation
-3. Included the planned production monitoring section
-Updated project structure to reflect current state
-5. Added more detailed PLC configuration
-Kept the clear TODO lists but organized them better
-Would you like me to:
-Add more technical details?
-Include configuration examples?
-Add troubleshooting section?
-Expand any particular section?
 
