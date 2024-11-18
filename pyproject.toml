@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "plc-visualizer"
+version = "0.1.0"
+description = "Real-time PLC data visualization"
+authors = ["Peter <peter@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+quart = "^0.19.8"
+pycomm3 = "^1.2.14"
+python-dotenv = "^1.0.1"
+sqlalchemy = "^2.0.28"
+aiosqlite = "^0.20.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
+black = "^24.10.0"
+flake8 = "^7.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

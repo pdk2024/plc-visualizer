@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Tunnel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+    <style>
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        .chart-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .nav-links {
+            margin: 10px 0;
+            text-align: right;
+        }
+        .nav-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        }
+        .nav-links a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .tab-container {
+            margin: 20px 0;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .tab-button:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .chart-tab {
+            display: none;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chart-tab.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Steam Tunnel Parameters</h1>
+        <div class="nav-links">
+            <a href="/history">View Historical Data</a>
+        </div>
+        <div id="connectionStatus" class="status"></div>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('pressure')">Steam Pressure</button>
+                <button class="tab-button" onclick="showTab('temperature')">Steam Temperature</button>
+                <button class="tab-button" onclick="showTab('flow')">Steam Flow</button>
+            </div>
+            
+            <div id="pressure-tab" class="chart-tab active">
+                <canvas id="pressureChart"></canvas>
+            </div>
+            
+            <div id="temperature-tab" class="chart-tab">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+            
+            <div id="flow-tab" class="chart-tab">
+                <canvas id="flowChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const maxDataPoints = 100;
+        
+        // Create charts with appropriate scales
+        const pressureChart = createChart('pressureChart', 'Steam Pressure', 'bar', 
+            ['Steam Pressure SP', 'Steam Pressure PV'], 
+            ['rgb(75, 192, 192)', 'rgb(255, 99, 132)']);
+            
+        const temperatureChart = createChart('temperatureChart', 'Steam Temperature', '°C',
+            ['Steam Temperature SP', 'Steam Temperature PV'],
+            ['rgb(54, 162, 235)', 'rgb(255, 159, 64)']);
+            
+        const flowChart = createChart('flowChart', 'Steam Flow', 'kg/h',
+            ['Steam Flow SP', 'Steam Flow PV'],
+            ['rgb(153, 102, 255)', 'rgb(255, 205, 86)']);
+
+        function createChart(canvasId, title, units, labels, colors) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: labels[0],
+                            data: [],
+                            borderColor: colors[0],
+                            tension: 0.1
+                        },
+                        {
+                            label: labels[1],
+                            data: [],
+                            borderColor: colors[1],
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'second',
+                                stepSize: 3
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: units
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title
+                        }
+                    }
+                }
+            });
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Activate selected button
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.className = `status ${connected ? 'connected' : 'disconnected'}`;
+            statusDiv.textContent = connected ? 'Connected to PLC' : 'Disconnected from PLC';
+        }
+
+        // WebSocket handling
+        const ws = new WebSocket(`ws://${location.host}/ws`);
+        
+        ws.onopen = function() {
+            updateConnectionStatus(true);
+        };
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            if (data.error) {
+                console.error('PLC Error:', data.message);
+                updateConnectionStatus(false);
+                return;
+            }
+            
+            updateConnectionStatus(true);
+            const timestamp = new Date(data.timestamp);
+
+            // Update pressure chart
+            if (data.values['CV31027_PIDE.SP'] !== undefined) {
+                pressureChart.data.datasets[0].data.push({
+                    x: timestamp,
+                    y: data.values['CV31027_PIDE.SP']
+                });
+            }
+            if (data.values['CV31027_PIDE.PV'] !== undefined) {
+                pressureChart.data.datasets[1].data.push({
+                    x: timestamp,
+                    y: data.values['CV31027_PIDE.PV']
+                });
+            }
+
+            // Update temperature chart
+            if (data.values['CV31028_PIDE.SP'] !== undefined) {
+                temperatureChart.data.datasets[0].data.push({
+                    x: timestamp,
+                    y: data.values['CV31028_PIDE.SP']
+                });
+            }
+            if (data.values['CV31028_PIDE.PV'] !== undefined) {
+                temperatureChart.data.datasets[1].data.push({
+                    x: timestamp,
+                    y: data.values['CV31028_PIDE.PV']
+                });
+            }
+
+            // Update flow chart
+            if (data.values['CV31029_PIDE.SP'] !== undefined) {
+                flowChart.data.datasets[0].data.push({
+                    x: timestamp,
+                    y: data.values['CV31029_PIDE.SP']
+                });
+            }
+            if (data.values['CV31029_PIDE.PV'] !== undefined) {
+                flowChart.data.datasets[1].data.push({
+                    x: timestamp,
+                    y: data.values['CV31029_PIDE.PV']
+                });
+            }
+
+            // Maintain data point limit
+            [pressureChart, temperatureChart, flowChart].forEach(chart => {
+                chart.data.datasets.forEach(dataset => {
+                    if (dataset.data.length > maxDataPoints) {
+                        dataset.data.shift();
+                    }
+                });
+                chart.update('none');
+            });
+        };
+
+        ws.onerror = function(error) {
+            console.error('WebSocket error:', error);
+            updateConnectionStatus(false);
+        };
+
+        ws.onclose = function() {
+            console.log('WebSocket connection closed');
+            updateConnectionStatus(false);
+            
+            // Attempt to reconnect after 5 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        };
+    </script>
+</body>
+</html> 
