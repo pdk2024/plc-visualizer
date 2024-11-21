@@ -10,38 +10,44 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
-        .container {
-            width: 90%;
-            margin: 20px auto;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .chart-container {
-            background-color: white;
+            margin-bottom: 30px;
             padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: 20px;
+            height: 400px;
         }
         .controls {
-            margin: 20px 0;
+            margin-bottom: 20px;
             padding: 15px;
-            background-color: white;
+            background-color: #f8f9fa;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .date-picker {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
-        .date-picker input {
+        input {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            width: 200px;
         }
         button {
             padding: 8px 16px;
@@ -54,31 +60,33 @@
         button:hover {
             background-color: #45a049;
         }
-        .nav-links {
-            margin-bottom: 20px;
+        button:disabled {
+            background-color: #cccccc;
         }
-        .nav-links a {
-            color: #4CAF50;
+        .nav-bar {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+        .nav-bar a {
+            color: white;
             text-decoration: none;
-            margin-right: 15px;
+            padding: 8px 16px;
+            margin-right: 10px;
         }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
+        .nav-bar a:hover {
+            background-color: #555;
+            border-radius: 4px;
         }
         .tab-container {
             margin: 20px 0;
         }
-        
         .tab-buttons {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
         }
-        
         .tab-button {
             padding: 10px 20px;
             background-color: #f0f0f0;
@@ -86,135 +94,82 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s;
             color: #333;
         }
-        
         .tab-button:hover {
             background-color: #e0e0e0;
-            transform: translateY(-1px);
         }
-        
         .tab-button.active {
-            background-color: #2196F3;
+            background-color: #4CAF50;
             color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
         .chart-tab {
             display: none;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .chart-tab.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .controls {
             background-color: white;
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
         }
-        
-        .date-picker {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
+        .chart-tab.active {
+            display: block;
         }
-        
-        .date-picker input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
-        }
-        
-        .quick-select {
-            margin-top: 15px;
+        .quick-buttons {
+            margin-top: 10px;
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
         }
         
-        .quick-select button {
-            padding: 8px 16px;
-            background-color: #f8f9fa;
-            color: #2196F3;
-            border: 2px solid #2196F3;
+        .quick-buttons button {
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            color: black;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: 14px;
+            transition: background-color 0.3s;
         }
         
-        .quick-select button:hover {
-            background-color: #2196F3;
+        .quick-buttons button:hover {
+            background-color: #e0e0e0;
+        }
+        .nav-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        }
+        .nav-links a:hover {
+            background-color: #4CAF50;
             color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
-        }
-        
-        .quick-select button.active {
-            background-color: #2196F3;
-            color: white;
-        }
-        
-        .quick-select button:disabled {
-            background-color: #e9ecef;
-            border-color: #ced4da;
-            color: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>Steam Tunnel Historical Data</h1>
         <div class="nav-links">
-            <a href="/">← Back to Live View</a>
+            <a href="/">Back to Live Data</a>
         </div>
-        
-        <h1>Historical Data View</h1>
-        
+
         <div class="controls">
             <div class="date-picker">
-                <div>
-                    <label for="startDate">Start:</label>
-                    <input type="text" id="startDate" placeholder="Select start date/time">
-                </div>
+                <label for="startDate">Start Date:</label>
+                <input type="text" id="startDate" placeholder="Select start date and time">
                 
-                <div>
-                    <label for="endDate">End:</label>
-                    <input type="text" id="endDate" placeholder="Select end date/time">
-                </div>
+                <label for="endDate">End Date:</label>
+                <input type="text" id="endDate" placeholder="Select end date and time">
                 
-                <button id="loadHistory">Load Data</button>
+                <button id="queryButton">Query Data</button>
             </div>
-            
-            <div class="quick-select">
-                <button onclick="setTimeRange('1h')">Last Hour</button>
-                <button onclick="setTimeRange('8h')">Last 8 Hours</button>
-                <button onclick="setTimeRange('24h')">Last 24 Hours</button>
-                <button onclick="setTimeRange('7d')">Last 7 Days</button>
+            <div class="quick-buttons">
+                <button onclick="setTimeRange('1hour')">Last Hour</button>
+                <button onclick="setTimeRange('8hours')">Last 8 Hours</button>
+                <button onclick="setTimeRange('24hours')">Last 24 Hours</button>
+                <button onclick="setTimeRange('7days')">Last Week</button>
+                <button onclick="setTimeRange('30days')">Last Month</button>
             </div>
         </div>
         
@@ -223,6 +178,7 @@
                 <button class="tab-button active" onclick="showTab('pressure')">Steam Pressure</button>
                 <button class="tab-button" onclick="showTab('temperature')">Steam Temperature</button>
                 <button class="tab-button" onclick="showTab('flow')">Steam Flow</button>
+                <button class="tab-button" onclick="showTab('beltTracking')">Belt Tracking Limits</button>
             </div>
             
             <div id="pressure-tab" class="chart-tab active">
@@ -236,81 +192,48 @@
             <div id="flow-tab" class="chart-tab">
                 <canvas id="flowChart"></canvas>
             </div>
+            
+            <div id="beltTracking-tab" class="chart-tab">
+                <canvas id="beltTrackingChart"></canvas>
+            </div>
         </div>
     </div>
 
     <script>
-        // Initialize date pickers
-        flatpickr("#startDate", {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            defaultDate: new Date(Date.now() - 24 * 60 * 60 * 1000)
-        });
-        
-        flatpickr("#endDate", {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            defaultDate: new Date()
-        });
-        
-        // Quick select time ranges
-        function setTimeRange(range) {
-            const end = new Date();
-            let start = new Date();
-            
-            switch(range) {
-                case '1h':
-                    start.setHours(end.getHours() - 1);
-                    break;
-                case '8h':
-                    start.setHours(end.getHours() - 8);
-                    break;
-                case '24h':
-                    start.setDate(end.getDate() - 1);
-                    break;
-                case '7d':
-                    start.setDate(end.getDate() - 7);
-                    break;
-            }
-            
-            document.getElementById('startDate')._flatpickr.setDate(start);
-            document.getElementById('endDate')._flatpickr.setDate(end);
-            document.getElementById('loadHistory').click();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date pickers with seconds
+            flatpickr("#startDate", {
+                enableTime: true,
+                time_24hr: true,
+                dateFormat: "Y-m-d H:i:S",
+                defaultHour: 0,
+                defaultMinute: 0,
+                defaultSeconds: 0
+            });
 
-        // Create charts with appropriate scales and contrasting colors
-        const pressureChart = createChart('pressureChart', 'Historical Steam Pressure', 'bar', 
-            ['Steam Pressure SP', 'Steam Pressure PV'], 
-            ['#2196F3', '#F44336']  // Blue and Red
-        );
-            
-        const temperatureChart = createChart('temperatureChart', 'Historical Steam Temperature', '°C',
-            ['Steam Temperature SP', 'Steam Temperature PV'],
-            ['#4CAF50', '#FF9800']  // Green and Orange
-        );
-            
-        const flowChart = createChart('flowChart', 'Historical Steam Flow', 'kg/h',
-            ['Steam Flow SP', 'Steam Flow PV'],
-            ['#9C27B0', '#FFC107']  // Purple and Amber
-        );
+            flatpickr("#endDate", {
+                enableTime: true,
+                time_24hr: true,
+                dateFormat: "Y-m-d H:i:S",
+                defaultHour: 23,
+                defaultMinute: 59,
+                defaultSeconds: 59
+            });
 
-        function createChart(canvasId, title, units, labels, colors) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            return new Chart(ctx, {
+            // Initialize charts
+            const pressureChart = new Chart(document.getElementById('pressureChart'), {
                 type: 'line',
                 data: {
                     datasets: [
                         {
-                            label: labels[0],
-                            data: [],
-                            borderColor: colors[0],
-                            tension: 0.1
+                            label: 'Steam Pressure SP',
+                            borderColor: 'rgb(75, 192, 192)',
+                            data: []
                         },
                         {
-                            label: labels[1],
-                            data: [],
-                            borderColor: colors[1],
-                            tension: 0.1
+                            label: 'Steam Pressure PV',
+                            borderColor: 'rgb(255, 99, 132)',
+                            data: []
                         }
                     ]
                 },
@@ -320,202 +243,310 @@
                         x: {
                             type: 'time',
                             time: {
-                                unit: 'second',
-                                stepSize: 3
+                                unit: 'minute'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: units
+                                text: 'bar'
                             }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: title
                         }
                     }
                 }
             });
-        }
 
-        // Add to the top of the script section
-        function setLoadingState(isLoading) {
-            const loadButton = document.getElementById('loadHistory');
-            loadButton.disabled = isLoading;
-            loadButton.textContent = isLoading ? 'Loading...' : 'Load Data';
-        }
+            const temperatureChart = new Chart(document.getElementById('temperatureChart'), {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Steam Temperature SP',
+                            borderColor: 'rgb(54, 162, 235)',
+                            data: []
+                        },
+                        {
+                            label: 'Steam Temperature PV',
+                            borderColor: 'rgb(255, 159, 64)',
+                            data: []
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'minute'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '°C'
+                            }
+                        }
+                    }
+                }
+            });
 
-        // Update the load handler with more detailed logging
-        document.getElementById('loadHistory').addEventListener('click', async function() {
-            setLoadingState(true);
-            try {
+            const flowChart = new Chart(document.getElementById('flowChart'), {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Steam Flow SP',
+                            borderColor: 'rgb(153, 102, 255)',
+                            data: []
+                        },
+                        {
+                            label: 'Steam Flow PV',
+                            borderColor: 'rgb(255, 205, 86)',
+                            data: []
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'minute'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg/h'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const beltTrackingChart = new Chart(document.getElementById('beltTrackingChart'), {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'BELT LIMIT SWITCHES INFEED RIGHT',
+                            borderColor: 'rgb(255, 99, 132)',
+                            data: []
+                        },
+                        {
+                            label: 'BELT LIMIT SWITCHES INFEED LEFT',
+                            borderColor: 'rgb(54, 162, 235)',
+                            data: []
+                        },
+                        {
+                            label: 'BELT LIMIT SWITCHES OUTFEED RIGHT',
+                            borderColor: 'rgb(255, 206, 86)',
+                            data: []
+                        },
+                        {
+                            label: 'BELT LIMIT SWITCHES OUTFEED LEFT',
+                            borderColor: 'rgb(75, 192, 192)',
+                            data: []
+                        },
+                        {
+                            label: 'Extruder Left Motor Running',
+                            borderColor: 'rgb(153, 102, 255)',
+                            data: []
+                        },
+                        {
+                            label: 'Extruder Right Motor Running',
+                            borderColor: 'rgb(255, 159, 64)',
+                            data: []
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'minute'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'mm'
+                            }
+                        }
+                    }
+                }
+            });
+
+            function updateChart(chart, datasetIndex, timestamp, value) {
+                chart.data.datasets[datasetIndex].data.push({
+                    x: timestamp,
+                    y: value
+                });
+            }
+
+            // Add event listener to query button
+            document.getElementById('queryButton').addEventListener('click', async function() {
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;
-                
+
                 if (!startDate || !endDate) {
                     alert('Please select both start and end dates');
                     return;
                 }
-                
-                const response = await fetch(`/api/history?start=${encodeURIComponent(startDate)}&end=${encodeURIComponent(endDate)}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    alert(`Error loading historical data: ${data.message}`);
-                    return;
-                }
 
-                console.log('Raw data received:', data);  // Debug log
-                
-                // Clear existing data
-                [pressureChart, temperatureChart, flowChart].forEach(chart => {
-                    chart.data.datasets.forEach(dataset => {
-                        dataset.data = [];
+                try {
+                    const queryButton = document.getElementById('queryButton');
+                    queryButton.disabled = true;
+                    queryButton.textContent = 'Loading...';
+
+                    const response = await fetch(`/api/history?start=${encodeURIComponent(startDate)}&end=${encodeURIComponent(endDate)}`);
+                    const data = await response.json();
+
+                    if (data.error) {
+                        throw new Error(data.message);
+                    }
+
+                    // Clear existing data
+                    [pressureChart, temperatureChart, flowChart, beltTrackingChart].forEach(chart => {
+                        chart.data.datasets.forEach(dataset => {
+                            dataset.data = [];
+                        });
                     });
-                });
-                
-                // Group data by tag for debugging
-                const groupedData = {};
-                data.forEach(reading => {
-                    if (!groupedData[reading.tag_name]) {
-                        groupedData[reading.tag_name] = [];
-                    }
-                    groupedData[reading.tag_name].push(reading);
-                });
-                
-                console.log('Grouped data:', groupedData);  // Debug log
-                
-                // Process data for each chart
-                data.forEach(reading => {
-                    const timestamp = new Date(reading.timestamp);
-                    console.log(`Processing reading - Tag: ${reading.tag_name}, Value: ${reading.value}, Time: ${timestamp}`);
-                    
-                    // Extract base tag and type (SP/PV)
-                    const [baseTag, type] = reading.tag_name.split('.');
-                    
-                    switch(baseTag) {
-                        case 'CV31027_PIDE':
-                            if (type === 'SP') {
-                                pressureChart.data.datasets[0].data.push({x: timestamp, y: reading.value});
-                            } else if (type === 'PV') {
-                                pressureChart.data.datasets[1].data.push({x: timestamp, y: reading.value});
+
+                    // Process new data
+                    data.data.forEach(reading => {
+                        const timestamp = new Date(reading.timestamp);
+                        const value = reading.value;
+                        const tagName = reading.tag_name;
+
+                        if (tagName.startsWith('CV31027_PIDE')) {
+                            const index = tagName.endsWith('.SP') ? 0 : 1;
+                            updateChart(pressureChart, index, timestamp, value);
+                        } else if (tagName.startsWith('CV31028_PIDE')) {
+                            const index = tagName.endsWith('.SP') ? 0 : 1;
+                            updateChart(temperatureChart, index, timestamp, value);
+                        } else if (tagName.startsWith('CV31029_PIDE')) {
+                            const index = tagName.endsWith('.SP') ? 0 : 1;
+                            updateChart(flowChart, index, timestamp, value);
+                        } else if (tagName === 'PUMP31002_Running_Analog') {
+                            updateChart(beltTrackingChart, 4, timestamp, value);
+                        } else if (tagName === 'PUMP31004_Running_Analog') {
+                            updateChart(beltTrackingChart, 5, timestamp, value);
+                        } else if (tagName.includes('CNVR31007_Limit')) {
+                            const index = {
+                                'CNVR31007_Limit_Infeed_Right_Analog': 0,
+                                'CNVR31007_Limit_Infeed_Left_Analog': 1,
+                                'CNVR31007_Limit_Outfeed_Right_Analog': 2,
+                                'CNVR31007_Limit_Outfeed_Left_Analog': 3
+                            }[tagName];
+                            if (index !== undefined) {
+                                updateChart(beltTrackingChart, index, timestamp, value);
                             }
-                            break;
-                        case 'CV31028_PIDE':
-                            if (type === 'SP') {
-                                temperatureChart.data.datasets[0].data.push({x: timestamp, y: reading.value});
-                            } else if (type === 'PV') {
-                                temperatureChart.data.datasets[1].data.push({x: timestamp, y: reading.value});
-                            }
-                            break;
-                        case 'CV31029_PIDE':
-                            if (type === 'SP') {
-                                flowChart.data.datasets[0].data.push({x: timestamp, y: reading.value});
-                            } else if (type === 'PV') {
-                                flowChart.data.datasets[1].data.push({x: timestamp, y: reading.value});
-                            }
-                            break;
-                        default:
-                            console.log(`Unknown tag: ${reading.tag_name}`);
-                            break;
-                    }
-                });
-                
-                // Update all charts
-                [pressureChart, temperatureChart, flowChart].forEach(chart => {
-                    chart.update('none');
-                });
-            } catch (error) {
-                alert(`Error loading historical data: ${error.message}`);
-            } finally {
-                setLoadingState(false);
-            }
-        });
+                        }
+                    });
 
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.chart-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Deactivate all buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            
-            // Activate selected button
-            document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
-        }
+                    // Update all charts
+                    [pressureChart, temperatureChart, flowChart, beltTrackingChart].forEach(chart => {
+                        chart.update();
+                    });
 
-        // Add this after chart creation
-        console.log('Charts initialized:', {
-            pressure: pressureChart ? 'Created' : 'Failed',
-            temperature: temperatureChart ? 'Created' : 'Failed',
-            flow: flowChart ? 'Created' : 'Failed'
-        });
-
-        // Verify canvas elements exist
-        console.log('Canvas elements:', {
-            pressure: document.getElementById('pressureChart') ? 'Found' : 'Missing',
-            temperature: document.getElementById('temperatureChart') ? 'Found' : 'Missing',
-            flow: document.getElementById('flowChart') ? 'Found' : 'Missing'
-        });
-
-        function processData(data) {
-            console.log("Raw data received:", data);
-            
-            // Group data by tag
-            const groupedData = {};
-            data.forEach(reading => {
-                if (!groupedData[reading.tag]) {
-                    groupedData[reading.tag] = [];
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    alert('Error fetching data: ' + error.message);
+                } finally {
+                    const queryButton = document.getElementById('queryButton');
+                    queryButton.disabled = false;
+                    queryButton.textContent = 'Query Data';
                 }
-                groupedData[reading.tag].push({
-                    x: new Date(reading.timestamp),
-                    y: reading.value
-                });
             });
-            
-            console.log("Grouped data:", groupedData);
 
-            // Map tags to their respective charts
-            const tagMappings = {
-                'CV31027_PIDE': 'pressure',
-                'CV31028_PIDE': 'temperature',
-                'CV31029_PIDE': 'flow'
+            // Tab switching function
+            window.showTab = function(tabName) {
+                // Hide all tabs
+                document.querySelectorAll('.chart-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Deactivate all buttons
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('active');
+                });
+                
+                // Show selected tab
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+                
+                // Activate selected button
+                document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+
+                // Update the chart
+                const chart = {
+                    'pressure': pressureChart,
+                    'temperature': temperatureChart,
+                    'flow': flowChart,
+                    'beltTracking': beltTrackingChart
+                }[tabName];
+                
+                if (chart) {
+                    chart.update();
+                }
             };
 
-            // Update each chart with its corresponding data
-            Object.entries(groupedData).forEach(([tag, readings]) => {
-                const chartType = Object.entries(tagMappings).find(([prefix]) => tag.startsWith(prefix))?.[1];
-                if (chartType && charts[chartType]) {
-                    charts[chartType].data.datasets.push({
-                        label: tag,
-                        data: readings,
-                        borderColor: tag.endsWith('.SP') ? '#ff6384' : '#36a2eb',
-                        fill: false
-                    });
-                    charts[chartType].update();
-                }
-            });
-        }
+            // Add time range function
+            window.setTimeRange = function(range) {
+                const endDate = new Date();
+                let startDate = new Date();
 
-        // Change polling interval from 3s to 10s
-        const pollInterval = 10000; // 10 seconds
-        
-        function pollData() {
-            fetchHistoricalData();
-            setTimeout(pollData, pollInterval);
-        }
-        
-        // Start polling
-        pollData();
+                // Set end time to include seconds
+                endDate.setSeconds(59);
+                endDate.setMilliseconds(999);
+
+                switch(range) {
+                    case '1hour':
+                        startDate.setHours(endDate.getHours() - 1);
+                        break;
+                    case '8hours':
+                        startDate.setHours(endDate.getHours() - 8);
+                        break;
+                    case '24hours':
+                        startDate.setHours(endDate.getHours() - 24);
+                        break;
+                    case '7days':
+                        startDate.setDate(endDate.getDate() - 7);
+                        break;
+                    case '30days':
+                        startDate.setDate(endDate.getDate() - 30);
+                        break;
+                }
+
+                // Set start time to include seconds
+                startDate.setSeconds(0);
+                startDate.setMilliseconds(0);
+
+                // Format dates with seconds
+                const formatDate = (date) => {
+                    return date.getFullYear() + '-' +
+                           String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                           String(date.getDate()).padStart(2, '0') + ' ' +
+                           String(date.getHours()).padStart(2, '0') + ':' +
+                           String(date.getMinutes()).padStart(2, '0') + ':' +
+                           String(date.getSeconds()).padStart(2, '0');
+                };
+
+                // Update the date pickers
+                const startPicker = document.getElementById('startDate')._flatpickr;
+                const endPicker = document.getElementById('endDate')._flatpickr;
+                
+                startPicker.setDate(formatDate(startDate));
+                endPicker.setDate(formatDate(endDate));
+
+                // Automatically trigger the query
+                document.getElementById('queryButton').click();
+            };
+        });
     </script>
 </body>
 </html>

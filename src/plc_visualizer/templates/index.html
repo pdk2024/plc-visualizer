@@ -94,6 +94,44 @@
         .chart-tab.active {
             display: block;
         }
+        
+        .belt-tracking-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .sensor-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .sensor-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-top: 5px;
+            background-color: #f44336;
+            transition: all 0.3s ease;
+        }
+        
+        .sensor-indicator.active {
+            background-color: #4CAF50;
+            box-shadow: 0 0 5px #4CAF50;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +147,7 @@
                 <button class="tab-button active" onclick="showTab('pressure')">Steam Pressure</button>
                 <button class="tab-button" onclick="showTab('temperature')">Steam Temperature</button>
                 <button class="tab-button" onclick="showTab('flow')">Steam Flow</button>
+                <button class="tab-button" onclick="showTab('beltTracking')">Belt Tracking Limits</button>
             </div>
             
             <div id="pressure-tab" class="chart-tab active">
@@ -122,71 +161,193 @@
             <div id="flow-tab" class="chart-tab">
                 <canvas id="flowChart"></canvas>
             </div>
+            
+            <div id="beltTracking-tab" class="chart-tab">
+                <canvas id="beltTrackingChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="belt-tracking-container">
+            <h2>Belt Tracking Status</h2>
+            <div class="sensor-grid">
+                <div class="sensor-box">
+                    <span>BELT LIMIT SWITCHES INFEED LEFT</span>
+                    <div id="CNVR31007_Limit_Infeed_Left" class="sensor-indicator"></div>
+                </div>
+                <div class="sensor-box">
+                    <span>BELT LIMIT SWITCHES INFEED RIGHT</span>
+                    <div id="CNVR31007_Limit_Infeed_Right" class="sensor-indicator"></div>
+                </div>
+                <div class="sensor-box">
+                    <span>BELT LIMIT SWITCHES OUTFEED LEFT</span>
+                    <div id="CNVR31007_Limit_Outfeed_Left" class="sensor-indicator"></div>
+                </div>
+                <div class="sensor-box">
+                    <span>BELT LIMIT SWITCHES OUTFEED RIGHT</span>
+                    <div id="CNVR31007_Limit_Outfeed_Right" class="sensor-indicator"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const maxDataPoints = 100;
         
-        // Create charts with appropriate scales
-        const pressureChart = createChart('pressureChart', 'Steam Pressure', 'bar', 
-            ['Steam Pressure SP', 'Steam Pressure PV'], 
-            ['rgb(75, 192, 192)', 'rgb(255, 99, 132)']);
-            
-        const temperatureChart = createChart('temperatureChart', 'Steam Temperature', '°C',
-            ['Steam Temperature SP', 'Steam Temperature PV'],
-            ['rgb(54, 162, 235)', 'rgb(255, 159, 64)']);
-            
-        const flowChart = createChart('flowChart', 'Steam Flow', 'kg/h',
-            ['Steam Flow SP', 'Steam Flow PV'],
-            ['rgb(153, 102, 255)', 'rgb(255, 205, 86)']);
-
+        // First, define the chart creation function
         function createChart(canvasId, title, units, labels, colors) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: [
-                        {
-                            label: labels[0],
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.error(`Canvas element not found: ${canvasId}`);
+                return null;
+            }
+
+            try {
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: labels.map((label, index) => ({
+                            label: label,
                             data: [],
-                            borderColor: colors[0],
+                            borderColor: colors[index],
                             tension: 0.1
-                        },
-                        {
-                            label: labels[1],
-                            data: [],
-                            borderColor: colors[1],
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'second',
-                                stepSize: 3
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'second',
+                                    stepSize: 3
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: units
+                                }
                             }
                         },
-                        y: {
+                        plugins: {
                             title: {
                                 display: true,
-                                text: units
+                                text: title
                             }
                         }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: title
-                        }
                     }
+                });
+                console.log(`Chart created: ${canvasId}`);  // Debug log
+                return chart;
+            } catch (error) {
+                console.error(`Error creating chart ${canvasId}:`, error);
+                return null;
+            }
+        }
+
+        // WebSocket handling
+        const ws = new WebSocket(`ws://${location.host}/ws`);
+        let charts = {};
+
+        // Initialize charts after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create charts
+            charts.pressure = createChart('pressureChart', 'Steam Pressure', 'bar',
+                ['Steam Pressure SP', 'Steam Pressure PV'],
+                ['rgb(75, 192, 192)', 'rgb(255, 99, 132)']);
+            
+            charts.temperature = createChart('temperatureChart', 'Steam Temperature', '°C',
+                ['Steam Temperature SP', 'Steam Temperature PV'],
+                ['rgb(54, 162, 235)', 'rgb(255, 159, 64)']);
+            
+            charts.flow = createChart('flowChart', 'Steam Flow', 'kg/h',
+                ['Steam Flow SP', 'Steam Flow PV'],
+                ['rgb(153, 102, 255)', 'rgb(255, 205, 86)']);
+            
+            charts.beltTracking = createChart(
+                'beltTrackingChart', 
+                'Belt Tracking Limits', 
+                'mm',
+                [
+                    'BELT LIMIT SWITCHES INFEED RIGHT',
+                    'BELT LIMIT SWITCHES INFEED LEFT',
+                    'BELT LIMIT SWITCHES OUTFEED RIGHT',
+                    'BELT LIMIT SWITCHES OUTFEED LEFT',
+                    'Extruder Left Motor Running',
+                    'Extruder Right Motor Running'
+                ],
+                [
+                    '#2196F3', '#4CAF50',
+                    '#FF9800', '#9C27B0',
+                    '#795548', '#607D8B'
+                ]
+            );
+
+            console.log('Charts initialized:', charts);
+        });
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log('WebSocket message received:', data);  // Debug log
+            
+            if (data.error) {
+                console.error('PLC Error:', data.message);
+                updateConnectionStatus(false);
+                return;
+            }
+            
+            updateConnectionStatus(true);
+            const timestamp = new Date(data.timestamp);
+            const values = data.values.analog;
+            
+            // Update Steam Pressure chart
+            if (values['CV31027_PIDE.SP'] !== undefined) {
+                updateChart(charts.pressure, 0, timestamp, values['CV31027_PIDE.SP']);
+            }
+            if (values['CV31027_PIDE.PV'] !== undefined) {
+                updateChart(charts.pressure, 1, timestamp, values['CV31027_PIDE.PV']);
+            }
+
+            // Update Steam Temperature chart
+            if (values['CV31028_PIDE.SP'] !== undefined) {
+                updateChart(charts.temperature, 0, timestamp, values['CV31028_PIDE.SP']);
+            }
+            if (values['CV31028_PIDE.PV'] !== undefined) {
+                updateChart(charts.temperature, 1, timestamp, values['CV31028_PIDE.PV']);
+            }
+
+            // Update Steam Flow chart
+            if (values['CV31029_PIDE.SP'] !== undefined) {
+                updateChart(charts.flow, 0, timestamp, values['CV31029_PIDE.SP']);
+            }
+            if (values['CV31029_PIDE.PV'] !== undefined) {
+                updateChart(charts.flow, 1, timestamp, values['CV31029_PIDE.PV']);
+            }
+            
+            // Update Belt Tracking chart
+            const beltTrackingTags = {
+                'CNVR31007_Limit_Infeed_Right_Analog': 0,
+                'CNVR31007_Limit_Infeed_Left_Analog': 1,
+                'CNVR31007_Limit_Outfeed_Right_Analog': 2,
+                'CNVR31007_Limit_Outfeed_Left_Analog': 3,
+                'PUMP31002_Running_Analog': 4,
+                'PUMP31004_Running_Analog': 5
+            };
+
+            Object.entries(beltTrackingTags).forEach(([tag, index]) => {
+                if (values[tag] !== undefined) {
+                    updateChart(charts.beltTracking, index, timestamp, values[tag]);
                 }
             });
-        }
+
+            // Update all charts
+            [charts.pressure, charts.temperature, charts.flow, charts.beltTracking].forEach(chart => {
+                if (chart && chart.data) {
+                    chart.update('none');
+                }
+            });
+        };
 
         function showTab(tabName) {
             // Hide all tabs
@@ -213,75 +374,8 @@
         }
 
         // WebSocket handling
-        const ws = new WebSocket(`ws://${location.host}/ws`);
-        
         ws.onopen = function() {
             updateConnectionStatus(true);
-        };
-
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            
-            if (data.error) {
-                console.error('PLC Error:', data.message);
-                updateConnectionStatus(false);
-                return;
-            }
-            
-            updateConnectionStatus(true);
-            const timestamp = new Date(data.timestamp);
-
-            // Update pressure chart
-            if (data.values['CV31027_PIDE.SP'] !== undefined) {
-                pressureChart.data.datasets[0].data.push({
-                    x: timestamp,
-                    y: data.values['CV31027_PIDE.SP']
-                });
-            }
-            if (data.values['CV31027_PIDE.PV'] !== undefined) {
-                pressureChart.data.datasets[1].data.push({
-                    x: timestamp,
-                    y: data.values['CV31027_PIDE.PV']
-                });
-            }
-
-            // Update temperature chart
-            if (data.values['CV31028_PIDE.SP'] !== undefined) {
-                temperatureChart.data.datasets[0].data.push({
-                    x: timestamp,
-                    y: data.values['CV31028_PIDE.SP']
-                });
-            }
-            if (data.values['CV31028_PIDE.PV'] !== undefined) {
-                temperatureChart.data.datasets[1].data.push({
-                    x: timestamp,
-                    y: data.values['CV31028_PIDE.PV']
-                });
-            }
-
-            // Update flow chart
-            if (data.values['CV31029_PIDE.SP'] !== undefined) {
-                flowChart.data.datasets[0].data.push({
-                    x: timestamp,
-                    y: data.values['CV31029_PIDE.SP']
-                });
-            }
-            if (data.values['CV31029_PIDE.PV'] !== undefined) {
-                flowChart.data.datasets[1].data.push({
-                    x: timestamp,
-                    y: data.values['CV31029_PIDE.PV']
-                });
-            }
-
-            // Maintain data point limit
-            [pressureChart, temperatureChart, flowChart].forEach(chart => {
-                chart.data.datasets.forEach(dataset => {
-                    if (dataset.data.length > maxDataPoints) {
-                        dataset.data.shift();
-                    }
-                });
-                chart.update('none');
-            });
         };
 
         ws.onerror = function(error) {
@@ -298,6 +392,33 @@
                 window.location.reload();
             }, 5000);
         };
+
+        // Helper function to update chart data with error handling
+        function updateChart(chart, datasetIndex, timestamp, value) {
+            if (!chart || !chart.data || !chart.data.datasets[datasetIndex]) {
+                console.error('Invalid chart or dataset:', { 
+                    chartExists: !!chart, 
+                    dataExists: chart ? !!chart.data : false,
+                    datasetExists: chart && chart.data ? !!chart.data.datasets[datasetIndex] : false,
+                    datasetIndex: datasetIndex
+                });
+                return;
+            }
+
+            try {
+                chart.data.datasets[datasetIndex].data.push({
+                    x: timestamp,
+                    y: value
+                });
+
+                // Trim old data points
+                if (chart.data.datasets[datasetIndex].data.length > maxDataPoints) {
+                    chart.data.datasets[datasetIndex].data.shift();
+                }
+            } catch (error) {
+                console.error('Error updating chart:', error);
+            }
+        }
     </script>
 </body>
 </html> 
